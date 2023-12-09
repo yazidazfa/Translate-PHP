@@ -51,7 +51,7 @@ namespace Translet2
 
         private void GenerateNamespace(string namespaceName)
         {
-            sourceCodeBuilder.AppendLine($"<?php\nnamespace {namespaceName}\n");
+            sourceCodeBuilder.AppendLine($"<?php\nnamespace {namespaceName};\n");
         }
 
         private void GenerateClass(JsonData.Model model)
@@ -68,6 +68,27 @@ namespace Translet2
             foreach (var status in model.attributes)
             {
                 GenerateState(status);
+            }
+
+            sourceCodeBuilder.AppendLine("");
+
+            if (model.attributes != null)
+            {
+                GenerateConstructor(model.attributes);
+            }
+
+            sourceCodeBuilder.AppendLine("");
+
+            foreach (var attribute in model.attributes)
+            {
+                GenerateGetter(attribute);
+            }
+
+            sourceCodeBuilder.AppendLine("");
+
+            foreach (var attribute in model.attributes)
+            {
+                GenerateSetter(attribute);
             }
 
             sourceCodeBuilder.AppendLine("");
@@ -109,14 +130,14 @@ namespace Translet2
                 return;
             }
 
-            sourceCodeBuilder.AppendLine($"class {associationModel.class_name} {{");
+            sourceCodeBuilder.AppendLine($"class assoc_{associationModel.class_name} {{");
 
             foreach (var attribute in associationModel.attributes)
             {
                 // Adjust data types as needed
                 string dataType = MapDataType(attribute.data_type);
 
-                sourceCodeBuilder.AppendLine($"    private {dataType} ${attribute.attribute_name};");
+                sourceCodeBuilder.AppendLine($"     private {dataType} ${attribute.attribute_name};");
             }
 
             // Check if associatedClass.@class is not null before iterating
@@ -135,40 +156,128 @@ namespace Translet2
                 }
             }
 
+            sourceCodeBuilder.AppendLine("");
+
+            if (associationModel.attributes != null)
+            {
+                GenerateConstructor(associationModel.attributes);
+            }
+
+            foreach (var attribute in associationModel.attributes)
+            {
+                GenerateGetter(attribute);
+            }
+
+            foreach (var attribute in associationModel.attributes)
+            {
+                GenerateSetter(attribute);
+            }
             sourceCodeBuilder.AppendLine("}\n\n");
         }
 
-        private void GenerateState(JsonData.Attribute1 status) 
+        private void GenerateConstructor(List<JsonData.Attribute1> attributes)
+        {
+            sourceCodeBuilder.Append($"     public function __construct(");
+
+            foreach (var attribute in attributes)
+            {
+                if(attribute.attribute_name != "status") 
+                {
+                    sourceCodeBuilder.Append($"${attribute.attribute_name},");
+                }
+                
+            }
+
+            // Remove the trailing comma and add the closing parenthesis
+            if (attributes.Any())
+            {
+                sourceCodeBuilder.Length -= 1; // Remove the last character (",")
+            }
+
+            sourceCodeBuilder.AppendLine(") {");
+
+            foreach (var attribute in attributes)
+            {
+                if (attribute.attribute_name != "status")
+                {
+                    sourceCodeBuilder.AppendLine($"        $this->{attribute.attribute_name} = ${attribute.attribute_name};");
+                }
+            }
+
+            sourceCodeBuilder.AppendLine("}");
+        }
+
+        private void GenerateGetter(JsonData.Attribute1 getter)
+        {
+            if (getter.attribute_name != "status")
+            {
+                sourceCodeBuilder.AppendLine($"      public function get{getter.attribute_name}() {{");
+                sourceCodeBuilder.AppendLine($"        $this->{getter.attribute_name};");
+                sourceCodeBuilder.AppendLine($"}}");
+            }
+            
+        }
+
+        private void GenerateSetter(JsonData.Attribute1 setter)
+        {
+            if (setter.attribute_name != "status")
+            {
+                sourceCodeBuilder.AppendLine($"      public function set{setter.attribute_name}(${setter.attribute_name}) {{");
+                sourceCodeBuilder.AppendLine($"        $this->{setter.attribute_name} = ${setter.attribute_name};");
+                sourceCodeBuilder.AppendLine($"}}");
+            }
+            
+        }
+        private void GenerateState(JsonData.Attribute1 status)
         {
             if (status.attribute_name == "status")
             {
-                sourceCodeBuilder.AppendLine("     private $state;");
+                sourceCodeBuilder.AppendLine("    private $state;");
             }
         }
-        
-        private void GenerateStateTransitionMethod(JsonData.State state)
-        {
-            sourceCodeBuilder.AppendLine($"     public function {state.state_name}() {{");
-            sourceCodeBuilder.AppendLine($"       $this->state = '{state.state_name}';");
-            sourceCodeBuilder.AppendLine($"       echo \"state berubah menjadi {state.state_name}\";");
-            sourceCodeBuilder.AppendLine($"}}\n");
-        }
-
         private void GenerateGetState()
         {
             sourceCodeBuilder.AppendLine($"     public function GetState() {{");
             sourceCodeBuilder.AppendLine($"       $this->state;");
             sourceCodeBuilder.AppendLine($"}}\n");
         }
+
+        private void GenerateStateTransitionMethod(JsonData.State state)
+        {
+            if (state.state_event != null && state.state_event.Length > 0)
+            {
+                string setEvent = state.state_event[0];
+                string onEvent = state.state_event[1];
+                sourceCodeBuilder.AppendLine($"     public function {setEvent}() {{");
+                sourceCodeBuilder.AppendLine($"       $this->state = \"{state.state_value}\";");
+                sourceCodeBuilder.AppendLine($"}}\n");
+
+                sourceCodeBuilder.AppendLine($"     public function {onEvent}() {{");
+                sourceCodeBuilder.AppendLine($"       echo \"status saat ini {state.state_value}\";");
+                sourceCodeBuilder.AppendLine($"}}");
+            }
+
+
+            if (state.state_function != null && state.state_function.Length > 0)
+            {
+                string setFunction = state.state_function[0];
+                sourceCodeBuilder.AppendLine($"     public function {setFunction}() {{");
+                sourceCodeBuilder.AppendLine($"       $this->state = \"{state.state_value}\";");
+                sourceCodeBuilder.AppendLine($"}}\n");
+            }
+        }
         public class JsonData
         {
+            public string type { get; set; }
+            public string sub_id { get; set; }
             public string sub_name { get; set; }
             public List<Model> model { get; set; }
-
-            public class Model
+            public class Model  
             {
                 public string type { get; set; }
+                public string class_id { get; set; }
                 public string class_name { get; set; }
+                public string KL { get; set; }
                 public List<Attribute1> attributes { get; set; }
                 public List<State> states { get; set; }
                 public Model model { get; set; }
@@ -185,7 +294,12 @@ namespace Translet2
 
             public class State
             {
+                public string state_id { get; set; }
                 public string state_name { get; set; }
+                public string state_value { get; set; }
+                public string state_type { get; set; }
+                public string[] state_event { get; set; }
+                public string[] state_function { get; set; }
             }
 
             public class Class1
@@ -243,6 +357,8 @@ namespace Translet2
                 tabControl1.SelectTab(tabPage1);
                 richTextBox1.Text = displayJson;
             }
+
+            sourceCodeBuilder.Clear();
         }
 
         private void btn_translate_Click(object sender, EventArgs e)
@@ -251,6 +367,7 @@ namespace Translet2
             {
                 if (!string.IsNullOrEmpty(selectedJsonFilePath) && File.Exists(selectedJsonFilePath))
                 {
+                    sourceCodeBuilder.Clear();
                     GeneratePhpCode(selectedJsonFilePath);
                 }
                 else
@@ -262,6 +379,39 @@ namespace Translet2
             {
                 MessageBox.Show($"Error generating PHP code: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void btn_export_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "PHP Files|*.php";
+            saveFileDialog.Title = "Save PHP File";
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                string filePath = saveFileDialog.FileName;
+
+                try
+                {
+                    using (StreamWriter sw = new StreamWriter(filePath))
+                    {
+                        // Menuliskan konten dari RichTextBox ke file PHP
+                        sw.Write(richTextBox2.Text);
+                    }
+
+                    MessageBox.Show("File berhasil disimpan!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void btn_clear_Click(object sender, EventArgs e)
+        {
+            richTextBox1.Clear();
+            richTextBox2.Clear();
         }
     }
 }

@@ -31,12 +31,13 @@ namespace Translet2
         {
             this.btn_browse = new System.Windows.Forms.Button();
             this.btn_translate = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
+            this.btn_clear = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.richTextBox2 = new System.Windows.Forms.RichTextBox();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.btn_export = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -44,7 +45,7 @@ namespace Translet2
             // 
             // btn_browse
             // 
-            this.btn_browse.Location = new System.Drawing.Point(330, 12);
+            this.btn_browse.Location = new System.Drawing.Point(261, 12);
             this.btn_browse.Name = "btn_browse";
             this.btn_browse.Size = new System.Drawing.Size(75, 23);
             this.btn_browse.TabIndex = 0;
@@ -54,7 +55,7 @@ namespace Translet2
             // 
             // btn_translate
             // 
-            this.btn_translate.Location = new System.Drawing.Point(411, 12);
+            this.btn_translate.Location = new System.Drawing.Point(342, 12);
             this.btn_translate.Name = "btn_translate";
             this.btn_translate.Size = new System.Drawing.Size(75, 23);
             this.btn_translate.TabIndex = 1;
@@ -62,14 +63,15 @@ namespace Translet2
             this.btn_translate.UseVisualStyleBackColor = true;
             this.btn_translate.Click += new System.EventHandler(this.btn_translate_Click);
             // 
-            // button3
+            // btn_clear
             // 
-            this.button3.Location = new System.Drawing.Point(492, 12);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(75, 23);
-            this.button3.TabIndex = 2;
-            this.button3.Text = "Clear";
-            this.button3.UseVisualStyleBackColor = true;
+            this.btn_clear.Location = new System.Drawing.Point(423, 12);
+            this.btn_clear.Name = "btn_clear";
+            this.btn_clear.Size = new System.Drawing.Size(75, 23);
+            this.btn_clear.TabIndex = 2;
+            this.btn_clear.Text = "Clear";
+            this.btn_clear.UseVisualStyleBackColor = true;
+            this.btn_clear.Click += new System.EventHandler(this.btn_clear_Click);
             // 
             // tabControl1
             // 
@@ -92,13 +94,23 @@ namespace Translet2
             this.tabPage1.Text = "Input";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // richTextBox1
+            // 
+            this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.richTextBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.richTextBox1.Location = new System.Drawing.Point(3, 3);
+            this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.Size = new System.Drawing.Size(819, 404);
+            this.richTextBox1.TabIndex = 0;
+            this.richTextBox1.Text = "";
+            // 
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.richTextBox2);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(825, 407);
+            this.tabPage2.Size = new System.Drawing.Size(825, 410);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Output";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -106,28 +118,31 @@ namespace Translet2
             // richTextBox2
             // 
             this.richTextBox2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.richTextBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.richTextBox2.Location = new System.Drawing.Point(3, 3);
             this.richTextBox2.Name = "richTextBox2";
-            this.richTextBox2.Size = new System.Drawing.Size(819, 401);
+            this.richTextBox2.Size = new System.Drawing.Size(819, 404);
             this.richTextBox2.TabIndex = 0;
             this.richTextBox2.Text = "";
             // 
-            // richTextBox1
+            // btn_export
             // 
-            this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBox1.Location = new System.Drawing.Point(3, 3);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(819, 404);
-            this.richTextBox1.TabIndex = 0;
-            this.richTextBox1.Text = "";
+            this.btn_export.Location = new System.Drawing.Point(504, 12);
+            this.btn_export.Name = "btn_export";
+            this.btn_export.Size = new System.Drawing.Size(75, 23);
+            this.btn_export.TabIndex = 4;
+            this.btn_export.Text = "Export";
+            this.btn_export.UseVisualStyleBackColor = true;
+            this.btn_export.Click += new System.EventHandler(this.btn_export_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(857, 489);
+            this.Controls.Add(this.btn_export);
             this.Controls.Add(this.tabControl1);
-            this.Controls.Add(this.button3);
+            this.Controls.Add(this.btn_clear);
             this.Controls.Add(this.btn_translate);
             this.Controls.Add(this.btn_browse);
             this.Name = "Form1";
@@ -144,12 +159,13 @@ namespace Translet2
 
         private System.Windows.Forms.Button btn_browse;
         private System.Windows.Forms.Button btn_translate;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button btn_clear;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.RichTextBox richTextBox2;
         private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.Button btn_export;
     }
 }
 
