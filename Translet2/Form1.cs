@@ -45,6 +45,24 @@ namespace Translet2
                 }
             }
 
+            bool generateAssocClass = json.model.Any(model => model.type == "association");
+
+            if (generateAssocClass)
+            {
+                sourceCodeBuilder.AppendLine($"// Just an Example");
+                GenerateAssocClass();
+            }
+
+
+            foreach (var model in json.model)
+            {
+                if (model.type == "association")
+                {
+                    GenerateObjAssociation(model);
+                }
+            }
+
+
             // Display or save the generated PHP code
             richTextBox2.Text = sourceCodeBuilder.ToString();
         }
@@ -266,6 +284,30 @@ namespace Translet2
                 sourceCodeBuilder.AppendLine($"}}\n");
             }
         }
+
+        private void GenerateAssocClass()
+        {
+            sourceCodeBuilder.AppendLine($"class Association{{");
+            sourceCodeBuilder.AppendLine($"     public function __construct($class1,$class2) {{");
+            sourceCodeBuilder.AppendLine($"}}");
+            sourceCodeBuilder.AppendLine($"}}");
+            sourceCodeBuilder.AppendLine($"\n");
+        }
+        private void GenerateObjAssociation(JsonData.Model assoc)
+        {
+
+
+            sourceCodeBuilder.Append($"${assoc.name} = new Association(");
+            
+            foreach (var association in assoc.@class)
+            {
+                sourceCodeBuilder.Append($"\"{association.class_name}\",");
+            }
+  
+            sourceCodeBuilder.Length -= 1; // Remove the last character (",")
+   
+            sourceCodeBuilder.AppendLine($");");
+        }
         public class JsonData
         {
             public string type { get; set; }
@@ -278,6 +320,7 @@ namespace Translet2
                 public string class_id { get; set; }
                 public string class_name { get; set; }
                 public string KL { get; set; }
+                public string name { get; set; }
                 public List<Attribute1> attributes { get; set; }
                 public List<State> states { get; set; }
                 public Model model { get; set; }
