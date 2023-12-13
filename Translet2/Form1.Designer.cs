@@ -146,7 +146,7 @@ namespace Translet2
             this.Controls.Add(this.btn_translate);
             this.Controls.Add(this.btn_browse);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Translate to PHP";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);

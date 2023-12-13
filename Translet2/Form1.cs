@@ -222,6 +222,20 @@ namespace Translet2
                 }
             }
 
+            // Handle the "status" attribute separately outside the loop
+            var statusAttribute = attributes.FirstOrDefault(attr => attr.attribute_name == "status");
+            if (statusAttribute != null)
+            {
+                // Check if the attribute has a default value and it is a string
+                if (!string.IsNullOrEmpty(statusAttribute.default_value) && statusAttribute.data_type.ToLower() == "state")
+                {
+                    int lastDotIndex = statusAttribute.default_value.LastIndexOf('.');
+                    // Replace "status" with "state" and "aktif" with "active"
+                    string stringValue = statusAttribute.default_value.Substring(lastDotIndex + 1).Replace("aktif", "active");
+                    sourceCodeBuilder.AppendLine($"        $this->state = \"{stringValue}\";");
+                }
+            }
+
             sourceCodeBuilder.AppendLine("}");
         }
 
@@ -253,6 +267,7 @@ namespace Translet2
                 sourceCodeBuilder.AppendLine("    private $state;");
             }
         }
+
         private void GenerateGetState()
         {
             sourceCodeBuilder.AppendLine($"     public function GetState() {{");
@@ -422,6 +437,7 @@ namespace Translet2
             {
                 MessageBox.Show($"Error generating PHP code: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            tabControl1.SelectedIndex = 1;
         }
 
         private void btn_export_Click(object sender, EventArgs e)
