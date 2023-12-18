@@ -283,7 +283,7 @@ namespace Translet2
                 string onEvent = state.state_event[1];
                 sourceCodeBuilder.AppendLine($"     public function {setEvent}() {{");
                 sourceCodeBuilder.AppendLine($"       $this->state = \"{state.state_value}\";");
-                sourceCodeBuilder.AppendLine($"}}\n");
+                sourceCodeBuilder.AppendLine($"}}");
 
                 sourceCodeBuilder.AppendLine($"     public function {onEvent}() {{");
                 sourceCodeBuilder.AppendLine($"       echo \"status saat ini {state.state_value}\";");
@@ -412,21 +412,29 @@ namespace Translet2
             {
                 selectedJsonFilePath = dialog.FileName;
                 string displayJson = File.ReadAllText(selectedJsonFilePath);
-                tabControl1.SelectTab(tabPage1);
                 richTextBox1.Text = displayJson;
+                btn_copy1.Enabled = true;
+                isTextCleared = false;
             }
-
             sourceCodeBuilder.Clear();
+            
         }
 
         private void btn_translate_Click(object sender, EventArgs e)
         {
             try
             {
-                if (!string.IsNullOrEmpty(selectedJsonFilePath) && File.Exists(selectedJsonFilePath))
+                if (!isTextCleared && !string.IsNullOrEmpty(selectedJsonFilePath) && File.Exists(selectedJsonFilePath))
                 {
                     sourceCodeBuilder.Clear();
                     GeneratePhpCode(selectedJsonFilePath);
+                    label2.Text = string.Empty;
+                    btn_copy2.Enabled = true;
+                    btn_export.Enabled = true;
+                }
+                else if (isTextCleared)
+                {
+                    MessageBox.Show("Please load a new JSON file before translating.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else
                 {
@@ -437,7 +445,6 @@ namespace Translet2
             {
                 MessageBox.Show($"Error generating PHP code: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            tabControl1.SelectedIndex = 1;
         }
 
         private void btn_export_Click(object sender, EventArgs e)
@@ -466,11 +473,47 @@ namespace Translet2
                 }
             }
         }
-
+        private bool isTextCleared = false;
         private void btn_clear_Click(object sender, EventArgs e)
         {
             richTextBox1.Clear();
             richTextBox2.Clear();
+            btn_copy1.Enabled = false;
+            btn_copy2.Enabled = false;
+            btn_export.Enabled = false;
+
+            isTextCleared = true;
+        }
+
+        private void btn_help_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("How to Use the Application:\n1. Upload your JSON file\n2. Click the 'Translate' button to generate the json into PHP\n3. The result will be displayed on the screen\n4. If you want to Export the result to a PHP file, please click the 'Save' button", "Help", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void btn_copy1_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(richTextBox1.Text))
+            {
+                Clipboard.SetText(richTextBox1.Text);
+                MessageBox.Show("JSON content copied to clipboard!", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("Please select JSON file first!", "Warning");
+            }
+        }
+
+        private void btn_copy2_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(richTextBox2.Text))
+            {
+                Clipboard.SetText(richTextBox2.Text);
+                MessageBox.Show("PHP content copied to clipboard!", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("Please translate JSON file first!", "Warning");
+            }
         }
     }
 }
