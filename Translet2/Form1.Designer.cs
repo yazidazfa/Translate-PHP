@@ -40,6 +40,7 @@ namespace Translet2
             this.label1 = new System.Windows.Forms.Label();
             this.btn_help = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
+            this.btn_parsing = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btn_browse
@@ -157,6 +158,16 @@ namespace Translet2
             this.label2.TabIndex = 11;
             this.label2.Text = "Translated PHP appears here...";
             // 
+            // btn_parsing
+            // 
+            this.btn_parsing.Location = new System.Drawing.Point(20, 142);
+            this.btn_parsing.Name = "btn_parsing";
+            this.btn_parsing.Size = new System.Drawing.Size(125, 35);
+            this.btn_parsing.TabIndex = 1;
+            this.btn_parsing.Text = "Parsing";
+            this.btn_parsing.UseVisualStyleBackColor = true;
+            this.btn_parsing.Click += new System.EventHandler(this.btn_parsing_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -171,6 +182,7 @@ namespace Translet2
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.btn_export);
             this.Controls.Add(this.btn_clear);
+            this.Controls.Add(this.btn_parsing);
             this.Controls.Add(this.btn_translate);
             this.Controls.Add(this.btn_browse);
             this.Name = "Form1";
@@ -194,6 +206,7 @@ namespace Translet2
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btn_help;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button btn_parsing;
     }
 }
 

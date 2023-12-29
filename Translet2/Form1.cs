@@ -580,5 +580,12 @@ namespace Translet2
                 MessageBox.Show("Please translate JSON file first!", "Warning");
             }
         }
+
+        private void btn_parsing_Click(object sender, EventArgs e)
+        {
+            Parsing parsing = new Parsing();
+
+            parsing.Show();
+        }
     }
 }

@@ -11,3 +11,4 @@ D:\UIN\Semester 5\PPPL\Translet2\Translet2\obj\Debug\Translet2.csproj.CoreCompil
 D:\UIN\Semester 5\PPPL\Translet2\Translet2\obj\Debug\Translet2.csproj.CopyComplete
 D:\UIN\Semester 5\PPPL\Translet2\Translet2\obj\Debug\Translet2.exe
 D:\UIN\Semester 5\PPPL\Translet2\Translet2\obj\Debug\Translet2.pdb
+D:\UIN\Semester 5\PPPL\Translet2\Translet2\obj\Debug\Translet2.Parsing.resources
