@@ -43,24 +43,30 @@ namespace Translet2
                 {
                     GenerateAssociationClass(model.model);
                 }
+
+                if (model.type == "imported_class")
+                {
+                    sourceCodeBuilder.AppendLine($"//Imported Class");
+                    GenerateImportedClass(model);
+                }
             }
 
             bool generateAssocClass = json.model.Any(model => model.type == "association");
 
-            if (generateAssocClass)
-            {
-                sourceCodeBuilder.AppendLine($"// Just an Example");
-                GenerateAssocClass();
-            }
+            //if (generateAssocClass)
+            //{
+            //    sourceCodeBuilder.AppendLine($"// Just an Example");
+            //    GenerateAssocClass();
+            //}
 
 
-            foreach (var model in json.model)
-            {
-                if (model.type == "association")
-                {
-                    GenerateObjAssociation(model);
-                }
-            }
+            //foreach (var model in json.model)
+            //{
+            //    if (model.type == "association")
+            //    {
+            //        GenerateObjAssociation(model);
+            //    }
+            //}
 
 
             // Display or save the generated PHP code
@@ -76,16 +82,12 @@ namespace Translet2
         {
             sourceCodeBuilder.AppendLine($"class {model.class_name} {{");
 
+            // Sort attributes alphabetically
+            var sortedAttributes = model.attributes.OrderBy(attr => attr.attribute_name);
+
             foreach (var attribute in model.attributes)
             {
                 GenerateAttribute(attribute);
-            }
-
-            sourceCodeBuilder.AppendLine("");
-
-            foreach (var status in model.attributes)
-            {
-                GenerateState(status);
             }
 
             sourceCodeBuilder.AppendLine("");
@@ -113,17 +115,14 @@ namespace Translet2
 
             if (model.states != null)
             {
-                foreach (var state in model.states)
+                
+                GenerateStateTransitionMethods(model.states);
+                
+                foreach (var stateAttribute in model.attributes.Where(attr => attr.data_type == "state"))
                 {
-                    GenerateStateTransitionMethod(state);
+                    GenerateGetState(stateAttribute);
                 }
             }
-
-            if (model.states != null)
-            {
-                GenerateGetState();
-            }
-
 
             sourceCodeBuilder.AppendLine("}\n\n");
         }
@@ -132,11 +131,15 @@ namespace Translet2
         {
             // Adjust data types as needed
             string dataType = MapDataType(attribute.data_type);
-
-            if (dataType != "state") 
+            if (attribute.data_type != "state")
             {
                 sourceCodeBuilder.AppendLine($"    private {dataType} ${attribute.attribute_name};");
             }
+            else
+            {
+                sourceCodeBuilder.AppendLine($"    private ${attribute.attribute_name};");
+            }
+            
         }
 
         private void GenerateAssociationClass(JsonData.Model associationModel)
@@ -193,13 +196,60 @@ namespace Translet2
             sourceCodeBuilder.AppendLine("}\n\n");
         }
 
+        private void GenerateImportedClass(JsonData.Model imported)
+        {
+            if (imported == null)
+            {
+                return;
+            }
+            sourceCodeBuilder.AppendLine($"class {imported.class_name} {{");
+
+            foreach (var attribute in imported.attributes)
+            {
+                GenerateAttribute(attribute);
+            }
+
+            sourceCodeBuilder.AppendLine("");
+
+            if (imported.attributes != null)
+            {
+                GenerateConstructor(imported.attributes);
+            }
+
+            sourceCodeBuilder.AppendLine("");
+
+            foreach (var attribute in imported.attributes)
+            {
+                GenerateGetter(attribute);
+            }
+
+            sourceCodeBuilder.AppendLine("");
+
+            foreach (var attribute in imported.attributes)
+            {
+                GenerateSetter(attribute);
+            }
+
+            sourceCodeBuilder.AppendLine("");
+
+            if (imported.states != null)
+            {
+
+                GenerateStateTransitionMethods(imported.states);
+
+                foreach (var stateAttribute in imported.attributes.Where(attr => attr.data_type == "state"))
+                {
+                    GenerateGetState(stateAttribute);
+                }
+            }
+        }
         private void GenerateConstructor(List<JsonData.Attribute1> attributes)
         {
             sourceCodeBuilder.Append($"     public function __construct(");
 
             foreach (var attribute in attributes)
             {
-                if(attribute.attribute_name != "status") 
+                if(attribute.data_type != "state") 
                 {
                     sourceCodeBuilder.Append($"${attribute.attribute_name},");
                 }
@@ -216,23 +266,23 @@ namespace Translet2
 
             foreach (var attribute in attributes)
             {
-                if (attribute.attribute_name != "status")
+                if (attribute.data_type != "state")
                 {
                     sourceCodeBuilder.AppendLine($"        $this->{attribute.attribute_name} = ${attribute.attribute_name};");
                 }
             }
 
-            // Handle the "status" attribute separately outside the loop
-            var statusAttribute = attributes.FirstOrDefault(attr => attr.attribute_name == "status");
-            if (statusAttribute != null)
+            // Handle the "state" datatype separately outside the loop
+            var stateAttribute = attributes.FirstOrDefault(attr => attr.data_type == "state");
+            if (stateAttribute != null)
             {
                 // Check if the attribute has a default value and it is a string
-                if (!string.IsNullOrEmpty(statusAttribute.default_value) && statusAttribute.data_type.ToLower() == "state")
+                if (!string.IsNullOrEmpty(stateAttribute.default_value) && stateAttribute.data_type.ToLower() == "state")
                 {
-                    int lastDotIndex = statusAttribute.default_value.LastIndexOf('.');
+                    int lastDotIndex = stateAttribute.default_value.LastIndexOf('.');
                     // Replace "status" with "state" and "aktif" with "active"
-                    string stringValue = statusAttribute.default_value.Substring(lastDotIndex + 1).Replace("aktif", "active");
-                    sourceCodeBuilder.AppendLine($"        $this->state = \"{stringValue}\";");
+                    string stringValue = stateAttribute.default_value.Substring(lastDotIndex + 1);
+                    sourceCodeBuilder.AppendLine($"        $this->{stateAttribute.attribute_name} = \"{stringValue}\";");
                 }
             }
 
@@ -241,7 +291,7 @@ namespace Translet2
 
         private void GenerateGetter(JsonData.Attribute1 getter)
         {
-            if (getter.attribute_name != "status")
+            if (getter.data_type != "state")
             {
                 sourceCodeBuilder.AppendLine($"      public function get{getter.attribute_name}() {{");
                 sourceCodeBuilder.AppendLine($"        $this->{getter.attribute_name};");
@@ -252,7 +302,7 @@ namespace Translet2
 
         private void GenerateSetter(JsonData.Attribute1 setter)
         {
-            if (setter.attribute_name != "status")
+            if (setter.data_type != "state")
             {
                 sourceCodeBuilder.AppendLine($"      public function set{setter.attribute_name}(${setter.attribute_name}) {{");
                 sourceCodeBuilder.AppendLine($"        $this->{setter.attribute_name} = ${setter.attribute_name};");
@@ -260,46 +310,53 @@ namespace Translet2
             }
             
         }
-        private void GenerateState(JsonData.Attribute1 status)
+
+        private void GenerateGetState(JsonData.Attribute1 getstate)
         {
-            if (status.attribute_name == "status")
+            if (getstate.data_type == "state")
             {
-                sourceCodeBuilder.AppendLine("    private $state;");
-            }
-        }
-
-        private void GenerateGetState()
-        {
-            sourceCodeBuilder.AppendLine($"     public function GetState() {{");
-            sourceCodeBuilder.AppendLine($"       $this->state;");
-            sourceCodeBuilder.AppendLine($"}}\n");
-        }
-
-        private void GenerateStateTransitionMethod(JsonData.State state)
-        {
-            if (state.state_event != null && state.state_event.Length > 0)
-            {
-                string setEvent = state.state_event[0];
-                string onEvent = state.state_event[1];
-                sourceCodeBuilder.AppendLine($"     public function {setEvent}() {{");
-                sourceCodeBuilder.AppendLine($"       $this->state = \"{state.state_value}\";");
-                sourceCodeBuilder.AppendLine($"}}");
-
-                sourceCodeBuilder.AppendLine($"     public function {onEvent}() {{");
-                sourceCodeBuilder.AppendLine($"       echo \"status saat ini {state.state_value}\";");
-                sourceCodeBuilder.AppendLine($"}}");
-            }
-
-
-            if (state.state_function != null && state.state_function.Length > 0)
-            {
-                string setFunction = state.state_function[0];
-                sourceCodeBuilder.AppendLine($"     public function {setFunction}() {{");
-                sourceCodeBuilder.AppendLine($"       $this->state = \"{state.state_value}\";");
+                sourceCodeBuilder.AppendLine($"     public function GetState() {{");
+                sourceCodeBuilder.AppendLine($"       $this->{getstate.attribute_name};");
                 sourceCodeBuilder.AppendLine($"}}\n");
             }
+            
         }
 
+        private void GenerateStateTransitionMethods(List<JsonData.State> states)
+        {
+            foreach (var state in states)
+            {
+                if (state.state_event != null)
+                {
+                    foreach (var eventName in state.state_event)
+                    {
+                        string methodName = $"{Char.ToUpper(eventName[0])}{eventName.Substring(1)}";
+
+                        sourceCodeBuilder.AppendLine($"     public function {methodName}() {{");
+
+                        if (state.transitions != null)
+                        {
+                            foreach (var transition in state.transitions)
+                            {
+                                if (transition != null)
+                                {
+                                    string targetStateId = transition.target_state_id;
+                                    string targetState = transition.target_state;
+
+                                    if (!string.IsNullOrEmpty(targetStateId))
+                                    {
+                                        sourceCodeBuilder.AppendLine($"       $this->SetStateById({targetStateId});");
+                                    }
+                                }
+                            }
+                        }
+
+                        sourceCodeBuilder.AppendLine($"       $this->{state.state_name} = \"{state.state_value}\";");
+                        sourceCodeBuilder.AppendLine($"     }}\n");
+                    }
+                }
+            }
+        }
         private void GenerateAssocClass()
         {
             sourceCodeBuilder.AppendLine($"class Association{{");
@@ -358,6 +415,8 @@ namespace Translet2
                 public string state_type { get; set; }
                 public string[] state_event { get; set; }
                 public string[] state_function { get; set; }
+                public string[] state_transition_id { get; set; }
+                public List<Transition> transitions { get; set; }
             }
 
             public class Class1
@@ -373,6 +432,12 @@ namespace Translet2
                 public string attribute_name { get; set; }
                 public string data_type { get; set; }
                 public string attribute_type { get; set; }
+            }
+
+            public class Transition
+            {
+                public string target_state_id { get; set; }
+                public string target_state { get; set; }
             }
         }
 
