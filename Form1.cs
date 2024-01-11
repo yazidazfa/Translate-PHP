@@ -24,6 +24,7 @@ namespace xtUML1
         private string[] fileNames;
         private bool isJsonFileSelected = false;
         private Translate translator;
+        private bool parsed = false;
         public Form1()
         {
             InitializeComponent();
@@ -127,6 +128,7 @@ namespace xtUML1
                 return;
             }
             JArray jsonArray = this.ProcessJson(fileNames);
+            string isiFileJson = textBox4.Text;
 
             textBox4.Clear();
             Parsing.Point1(this, jsonArray);
@@ -157,7 +159,14 @@ namespace xtUML1
 
             if (string.IsNullOrWhiteSpace(textBox4.Text))
             {
-                textBox4.Text = "Model has successfully passed parsing";
+                MessageBox.Show("Model has successfully passed parsing", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                parsed = true;
+
+                textBox4.Text = isiFileJson;
+            }
+            else
+            {
+                parsed = false;
             }
         }
 
@@ -186,7 +195,15 @@ namespace xtUML1
 
 
             // Display the generated PHP code in textBox3
-            textBox3.Text = phpCode;
+            if (parsed == true)
+            {
+                textBox3.Text = phpCode;
+            }
+            else
+            {
+                MessageBox.Show("JSON model is not successfully parsed", "Alert", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            
         }
 
 
@@ -195,6 +212,10 @@ namespace xtUML1
             // tulis method untuk menghapus nilai textBox1 (selected file)
             textBox3.Clear();
             textBox4.Clear();
+            isJsonFileSelected = false; // Reset the flag indicating whether a JSON file is selected
+            selectedFilePath = null; // Reset the selected file path
+            fileNames = null;
+            parsed = true; // Reset the parsed variable
         }
 
         private void btnHelp_Click(object sender, EventArgs e)
