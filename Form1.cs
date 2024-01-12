@@ -24,7 +24,7 @@ namespace xtUML1
         private string[] fileNames;
         private bool isJsonFileSelected = false;
         private Translate translator;
-        private bool parsed = false;
+        private bool parsed = true;
         public Form1()
         {
             InitializeComponent();
@@ -210,6 +210,7 @@ namespace xtUML1
         private void button3_Click(object sender, EventArgs e)
         {
             // tulis method untuk menghapus nilai textBox1 (selected file)
+            textBox1.Clear();
             textBox3.Clear();
             textBox4.Clear();
             isJsonFileSelected = false; // Reset the flag indicating whether a JSON file is selected
@@ -220,8 +221,34 @@ namespace xtUML1
 
         private void btnHelp_Click(object sender, EventArgs e)
         {
-            string helpMessage = "..."; // tulis isi help di sini
+            string helpMessage = OpenHelp();
             MessageBox.Show(helpMessage, "Help", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        private string OpenHelp()
+        {
+            StringBuilder helpMessage = new StringBuilder();
+
+            helpMessage.AppendLine("This is xtUML Model Compiler from xtUML JSON Model to PHP");
+            helpMessage.AppendLine();
+            helpMessage.AppendLine("1. Click 'Select File' to select a JSON formatted file as an input.");
+            helpMessage.AppendLine();
+            helpMessage.AppendLine("2. The application will automatically read the content of selected file and display the results in the JSON column.");
+            helpMessage.AppendLine();
+            helpMessage.AppendLine("3. Click 'Parse' to parse the input of xtUML JSON Model in order to meet xtUML standard rules, if the input does not meet the rules then there will be an alert. The input can not be visualized, translated, or simulated if it does not meet the rules.");
+            helpMessage.AppendLine();
+            helpMessage.AppendLine("4. Click 'Visualize' to visualize the xtUML Model into diagram model.");
+            helpMessage.AppendLine();
+            helpMessage.AppendLine("5. Click 'Translate' to translate the selected file into PHP code.");
+            helpMessage.AppendLine();
+            helpMessage.AppendLine("6. Click 'Simulate' to simulate PHP code as a program.");
+            helpMessage.AppendLine();
+            helpMessage.AppendLine("7. Click 'Copy' to copy the PHP code.");
+            helpMessage.AppendLine();
+            helpMessage.AppendLine("8. Click 'Save' to save the PHP code as an output into a php formatted file.");
+            helpMessage.AppendLine();
+            helpMessage.AppendLine("9. Click 'Reset' to clear the displayed data and selected file.");
+
+            return helpMessage.ToString();
         }
 
         private void btnCopy_Click(object sender, EventArgs e)

@@ -71,6 +71,9 @@ namespace xtUML1
                 //    }
                 //}
 
+                sourceCodeBuilder.AppendLine($"class TIMER {{");
+                sourceCodeBuilder.AppendLine($"}}");
+
                 // Display or save the generated PHP code
                 translatedPhpCode = sourceCodeBuilder.ToString();
             }
